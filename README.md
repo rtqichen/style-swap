@@ -3,19 +3,44 @@ Code for [arxiv link to be added].
 
 Code is written in Torch and requires CUDA and cuDNN.
 
-## Results
+## Examples
+<div align='center'>
+  <img src='images/content/bike.jpg' width="280px">
+  <img src='images/examples/bike_starry_3x3_max.jpg' width="280px">
+  <img src='images/examples/bike_swo_3x3_max.jpg' width="280px">
+</div>
+(3x3 Patches) Content - w/ Starry Night - w/ Small Worlds I
 
 <div align='center'>
-  <img src='images/content/bike.jpg' width="350px">
-  <img src='images/results/bike_starry_3x3.jpg' width="350px">
+  <img src='images/examples/bike_starry_3x3_avg.jpg' width="280px">
+  <img src='images/examples/bike_starry_3x3_max_invnet.jpg' width="280px">
+  <img src='images/examples/bike_swo_3x3_max_invnet.jpg' width="280px">
 </div>
+with AvgPooling - using Inverse Network - using Inverse Network
 
 <div align='center'>
-  <img src='images/content/brad_pitt.jpg' width="175px">
-  <img src='images/results/brad_pitt_stylized_3x3.jpg' width="175px">
-  <img src='images/results/brad_pitt_stylized_7x7.jpg' width="175px">
-  <img src='images/results/brad_pitt_stylized.jpg' width="175px">
+  <img src='images/content/brad_pitt.jpg' width="210px">
+  <img src='images/examples/brad_pitt_compx_5x5.jpg' width="210px">
+  <img src='images/examples/brad_pitt_compx_9x9.jpg' width="210px">
+  <img src='images/examples/brad_pitt_compx_15x15.jpg' width="210px">
 </div>
+(w/ Composition X) Original - 5x5 Patch - 9x9 Patch - 15x15 Patch
+
+<div align='center'>
+  <img src='images/content/brad_pitt.jpg' width="210px">
+  <img src='images/examples/brad_pitt_lamuse_3x3_max.jpg' width="210px">
+  <img src='images/examples/brad_pitt_lamuse_5x5_max.jpg' width="210px">
+  <img src='images/examples/brad_pitt_lamuse_9x9_max.jpg' width="210px">
+</div>
+(w/ La Muse) Original - 3x3 Patch - 5x5 Patch - 9x9 Patch
+
+## Download Pretrained VGG-19
+```
+git clone https://github.com/rtqichen/style-swap
+cd style-swap/models
+sh download_models.sh
+cd ..
+```
 
 ## Usage
 Stylizing a single image:
@@ -61,4 +86,4 @@ th style-swap --contentBatch video_frames --style /path/to/style/file --save sty
 ffmpeg -i stylized_frames/video_%04d_stylized.jpg -c:v libx264 -pix_fmt yuv420p stylized_video.mp4
 ```
 
-Examples of stylized videos are placed in the videos folder.
+Examples of stylized videos are placed in the videos folder. (Original video by [TimeLapseHD](https://www.youtube.com/watch?v=_xMz2SnSWS4).)
