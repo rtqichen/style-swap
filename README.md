@@ -1,5 +1,5 @@
 # Fast Patch-based Style Transfer of Arbitrary Style
-Code for [arxiv link to be added].
+Paper: https://arxiv.org/abs/1612.04337
 
 Code is written in Torch and requires CUDA and cuDNN.
 
