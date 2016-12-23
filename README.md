@@ -92,4 +92,4 @@ Examples of stylized videos are placed in the videos folder. (Original video by 
 A few ways to reduce memory usage:
 - Decrease `--maxStyleSize` and `--maxContentSize`. The latter changes the size of the resulting image.
 - Increase `--patchStride`. This extracts less patches to use for style swap. Best to use a larger `--patchSize` to ensure the patches still overlap.
-- Last resort: use CPU-only mode by specifying `--cpu`. 
+- Last resort: use CPU-only mode by specifying `--cpu`. Reduces GPU memory usage to zero.
