@@ -1,7 +1,7 @@
 # Fast Patch-based Style Transfer of Arbitrary Style
 Paper: https://arxiv.org/abs/1612.04337
 
-Code is written in Torch and requires CUDA and cuDNN.
+Code is written in Torch. CUDA and CPU modes are available.
 
 ## Examples
 <div align='center'>
@@ -89,7 +89,7 @@ ffmpeg -i stylized_frames/video_%04d_stylized.jpg -c:v libx264 -pix_fmt yuv420p 
 Examples of stylized videos are placed in the videos folder. (Original video by [TimeLapseHD](https://www.youtube.com/watch?v=_xMz2SnSWS4).)
 
 ## Reducing GPU Memory Usage
-A few ways to reduce memory usage:
+A few ways to reduce memory usage for `style-swap.lua`:
 - Decrease `--maxStyleSize` and `--maxContentSize`. The latter changes the size of the resulting image.
 - Increase `--patchStride`. This extracts less patches to use for style swap. Best to use a larger `--patchSize` to ensure the patches still overlap.
-- Last resort: use CPU-only mode by specifying `--cpu`. Reduces GPU memory usage to zero.
+- Last resort: use CPU-only mode by specifying `--cpu`. 
