@@ -10,6 +10,7 @@ opt = lapp[[
 == More Options ==
 --maxContentSize        (default 640)           Maximum height and width for content image
 --maxStyleSize          (default 512)           Maximum height and width for style image
+--cpu                                           If set, uses CPU only
 --save                  (default output)        Directory to save in
 --saveOriginal                                  If set, saves the original image as well
 
@@ -60,8 +61,10 @@ end
 print('Loading Lua modules...')
 
 require 'nn'
-require 'cudnn'
-require 'cunn'
+if not opt.cpu then
+    require 'cudnn'
+    require 'cunn'
+end
 require 'loadcaffe'
 require 'lib/ArtisticStyleLossCriterion'
 require 'image'
@@ -73,7 +76,9 @@ require 'lib/MaxCoord'
 require 'paths'
 require 'image'
 
-cutorch.setDevice(opt.gpu+1)
+if not opt.cpu then
+    cutorch.setDevice(opt.gpu+1)
+end
 
 vgg = loadcaffe.load('models/VGG_ILSVRC_19_layers_deploy.prototxt', 'models/VGG_ILSVRC_19_layers.caffemodel', 'nn')
 for i=46,37,-1 do
@@ -91,6 +96,11 @@ use_avg_pooling = opt.pooling == 'avg'
 criterion = nn.ArtisticStyleLossCriterion(vgg, layers, use_avg_pooling, weights, targets, false)
 vgg = nil
 collectgarbage()
+
+if not opt.cpu then
+    criterion.net = cudnn.convert(criterion.net, cudnn):cuda()
+end
+
 print(criterion.net)
 
 if opt.decoder ~= '' then
@@ -99,7 +109,9 @@ if opt.decoder ~= '' then
     decoder:add(nn.Unsqueeze(1)) -- add batch dim
     decoder:add(dec)
     decoder:add(nn.Squeeze(1))   -- remove batch dim
-    decoder:cuda()
+    if not opt.cpu then
+        decoder:cuda()
+    end
     collectgarbage()
     print(dec)
 end
@@ -142,8 +154,12 @@ function synth(img)
 end
 
 style_img = image.load(opt.style)
-style_img = image.scale(style_img, opt.maxStyleSize)
-style_img = style_img:cuda()
+if style_img:size(2) > opt.maxStyleSize or style_img:size(3) > opt.maxStyleSize then
+    style_img = image.scale(style_img, opt.maxStyleSize)
+end
+if not opt.cpu then
+    style_img = style_img:cuda()
+end
 
 criterion.targets = true    -- override behavior
 criterion.net:forward(style_img)
@@ -156,7 +172,10 @@ swap:add(swap_enc)
 swap:add(nn.MaxCoord())
 swap:add(swap_dec)
 swap:evaluate()
-swap:cuda()
+
+if not opt.cpu then
+    swap:cuda()
+end
 
 print(swap)
 
@@ -165,7 +184,9 @@ function swapTransfer(img, name)
         image.save(opt.save .. '/' .. name, img)
     end
 
-    img = img:cuda()
+    if not opt.cpu then
+        img = img:cuda()
+    end
 
     criterion:unsetTargets()
     criterion.net:forward(img)
@@ -192,7 +213,8 @@ function swapTransfer(img, name)
     else
         local nUpsample = string.match(opt.layer, "(%d)_%d") -1
         local H,W = swap_latent:size(2)*math.pow(2,nUpsample), swap_latent:size(3)*math.pow(2,nUpsample)
-        img = image.crop(img:double(), 0,0, W,H):cuda()
+        img = image.crop(img:double(), 0,0, W,H)
+        if not opt.cpu then img = img:cuda() end
         if opt.init == 'random' then img:uniform() end
         criterion.net.modules[#criterion.net.modules]:setTarget(swap_latent)
         x = synth(img)

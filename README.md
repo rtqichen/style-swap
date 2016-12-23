@@ -76,7 +76,7 @@ th train-vgg-decoder.lua --help
 For training the network in our paper, we used images from [MS COCO](http://mscoco.org/) and the [Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers) competition hosted by Kaggle.
 
 ### Video
-Frame-by-frame stylization can be done using the `-contentBatch` option. 
+Frame-by-frame stylization can be done using the `-contentBatch` option.
 
 An example script using `ffmpeg` to extract frames, stylize, and re-encode a video.
 ```
@@ -87,3 +87,9 @@ ffmpeg -i stylized_frames/video_%04d_stylized.jpg -c:v libx264 -pix_fmt yuv420p 
 ```
 
 Examples of stylized videos are placed in the videos folder. (Original video by [TimeLapseHD](https://www.youtube.com/watch?v=_xMz2SnSWS4).)
+
+## Reducing GPU Memory Usage
+A few ways to reduce memory usage:
+- Decrease `--maxStyleSize` and `--maxContentSize`. The latter changes the size of the resulting image.
+- Increase `--patchStride`. This extracts less patches to use for style swap. Best to use a larger `--patchSize` to ensure the patches still overlap.
+- Last resort: use CPU-only mode by specifying `--cpu`. 

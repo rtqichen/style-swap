@@ -1,18 +1,16 @@
-require 'cudnn'
-
 local module, parent = torch.class('nn.StylePatchLossModule', 'nn.Module')
 
 function module:__init(strength, normalize)
     parent.__init(self)
     self.strength = strength
     self.normalize = normalize or false
-    
+
     self.target_patches = nil
     self.stitched_patches = nil
-    self.conv_cc = cudnn.SpatialConvolution(1,1,1,1):noBias()
+    self.conv_cc = nn.SpatialConvolution(1,1,1,1):noBias()
     self.conv_cc.gradWeight = nil
 
-    self.conv_norm = cudnn.SpatialFullConvolution(1,1,1,1):noBias()
+    self.conv_norm = nn.SpatialFullConvolution(1,1,1,1):noBias()
     self.conv_norm.gradWeight = nil
 
     self.crit = nn.MSECriterion()
@@ -24,7 +22,7 @@ function module._extract_patches(img, patch_size, stride)
     local C, H, W = img:size(nDim-2), img:size(nDim-1), img:size(nDim)
     local nH = math.floor( (H - patch_size)/stride + 1)
     local nW = math.floor( (W - patch_size)/stride + 1)
-    
+
     -- extract patches
     local patches = torch.Tensor(nH*nW, C, patch_size, patch_size):typeAs(img)
     for i=1,nH*nW do
@@ -124,7 +122,7 @@ function module:updateOutput(input)
 end
 
 --[[
-TODO: 
+TODO:
 
 - instead of using nn.MSECriterion, which computes (x-a0) + (x-a1) + (x-a2) + ... + (x-ak),
 calculate gradInput by summing up the target pixel values in the forward step and compute
@@ -207,7 +205,7 @@ function module:updateGradInput(input, gradOutput)
         local oW = math.floor((W - kW) / dW + 1)
         local ones = torch.Tensor():typeAs(input):resize(N,1,oH,oW):fill(1)
         local normalization = self.conv_norm:forward(ones):expandAs(input)
-        
+
         self.gradInput = input:clone()
         self.gradInput:cmul(normalization):add(-self.last_targets)
         self.gradInput:mul(2/(kH*kW)/C)

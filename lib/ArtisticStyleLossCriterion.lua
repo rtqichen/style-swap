@@ -1,9 +1,4 @@
 require 'nn'
-
--- require CUDA.
-require 'cunn'
-require 'cudnn'
-
 require 'lib/ContentLossModule'
 require 'lib/StyleGramMatrixLossModule'
 require 'lib/StylePatchLossModule'
@@ -63,7 +58,7 @@ function criterion:__init(cnn, layers, use_avg_pool, weights, target, only_pad_b
     local next_content_idx = 1
 
     if weights.tv > 0 then
-        local tv_mod = nn.TVLossModule(weights.tv):cuda()
+        local tv_mod = nn.TVLossModule(weights.tv)
         net:add(tv_mod)
     end
     local nop = function() end
@@ -74,7 +69,7 @@ function criterion:__init(cnn, layers, use_avg_pool, weights, target, only_pad_b
             next_content_idx <= #layers.content then
             local layer = cnn:get(i)
             local name = layer.name
-            if torch.type(layer) == 'nn.SpatialConvolution' or torch.type(layer) == 'cudnn.SpatialConvolution' then
+            if torch.type(layer) == 'nn.SpatialConvolution' then
                 -- remove weight gradients.
                 layer.accGradParameters = nop
                 layer.gradWeight = nil
@@ -87,7 +82,7 @@ function criterion:__init(cnn, layers, use_avg_pool, weights, target, only_pad_b
                 end
             end
             -- change max pooling to average pooling
-            if torch.type(layer) == 'nn.SpatialMaxPooling' or torch.type(layer) == 'cudnn.SpatialMaxPooling' then
+            if torch.type(layer) == 'nn.SpatialMaxPooling' then
                 layer:floor()
                 pad_depth = pad_depth + 1
                 if use_avg_pool then
@@ -146,13 +141,13 @@ function criterion:__init(cnn, layers, use_avg_pool, weights, target, only_pad_b
     net:insert(getPreprocessConv(), 1)
 
     -- Prepare
-    self.net = cudnn.convert(net, cudnn):cuda()
+    self.net = net
 
     self.patchstyle_layers = patchstyle_layers
     self.gramstyle_layers = gramstyle_layers
     self.content_layers = content_layers
 
-    self.dy = torch.CudaTensor()
+    self.dy = torch.Tensor()
     if target ~= nil then
         self:setTargets(target, patch_size, patch_stride)
     end
@@ -181,9 +176,9 @@ function criterion:setContentTarget(target)
     end
     assert(target:nDimension()==3 or target:nDimension()==4, 'Content target must be 3D or 4D (batch).')
     self.targets = self.targets or {}
-    if target:type() ~= 'torch.CudaTensor' then
-        target = target:cuda()
-    end
+    -- if target:type() ~= 'torch.CudaTensor' then
+    --     target = target:cuda()
+    -- end
 
     self.targets.content = target:clone()
     self.net:clearState()
@@ -205,9 +200,9 @@ function criterion:setStyleTarget(target, patch_size, patch_stride)
     patch_size = patch_size or 3
     patch_stride = patch_stride or 1
     self.targets = self.targets or {}
-    if target:type() ~= 'torch.CudaTensor' then
-        target = target:cuda()
-    end
+    -- if target:type() ~= 'torch.CudaTensor' then
+    --     target = target:cuda()
+    -- end
 
     self.targets.style = target:clone()
 
@@ -247,9 +242,9 @@ function criterion:addStyleTarget(target)
         'Only gramstyle layers are supported for addStyleTarget, but there is one or more patch-style loss.')
 
     self.targets = self.targets or {}
-    if target:type() ~= 'torch.CudaTensor' then
-        target = target:cuda()
-    end
+    -- if target:type() ~= 'torch.CudaTensor' then
+    --     target = target:cuda()
+    -- end
 
     self.targets.style = target:clone()
     self.net:clearState()
@@ -300,7 +295,7 @@ end
 
 function criterion:updateGradInput(input, targets)
     if self.recompute_gradInput then
-        local dy = self.dy:resizeAs(self.net.output):zero()
+        local dy = self.dy:typeAs(self.net.output):resizeAs(self.net.output):zero()
         local grad = self.net:backward(input, dy)
         self.gradInput = grad:clone()
         -- reset targets
