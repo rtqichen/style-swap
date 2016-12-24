@@ -64,6 +64,13 @@ th style-swap.lua --contentBatch images/content --style images/style/starry_nigh
 ```
 
 ### Training an inverse network
+
+Install nninit module:
+```
+luarocks install nninit
+```
+
+Train:
 ```
 th train-vgg-decoder.lua --contentDir /path/to/dir --styleDir /path/to/dir
 ```
