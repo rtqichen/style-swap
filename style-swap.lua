@@ -99,6 +99,8 @@ collectgarbage()
 
 if not opt.cpu then
     criterion.net = cudnn.convert(criterion.net, cudnn):cuda()
+else
+    criterion.net:float()
 end
 
 print(criterion.net)
@@ -111,6 +113,8 @@ if opt.decoder ~= '' then
     decoder:add(nn.Squeeze(1))   -- remove batch dim
     if not opt.cpu then
         decoder:cuda()
+    else
+        decoder:float()
     end
     collectgarbage()
     print(dec)
@@ -159,6 +163,8 @@ if style_img:size(2) > opt.maxStyleSize or style_img:size(3) > opt.maxStyleSize 
 end
 if not opt.cpu then
     style_img = style_img:cuda()
+else
+    style_img = style_img:float()
 end
 
 criterion.targets = true    -- override behavior
@@ -175,6 +181,8 @@ swap:evaluate()
 
 if not opt.cpu then
     swap:cuda()
+else
+    swap:float()
 end
 
 print(swap)
@@ -186,6 +194,8 @@ function swapTransfer(img, name)
 
     if not opt.cpu then
         img = img:cuda()
+    else
+        img = img:float()
     end
 
     criterion:unsetTargets()
@@ -213,7 +223,7 @@ function swapTransfer(img, name)
     else
         local nUpsample = string.match(opt.layer, "(%d)_%d") -1
         local H,W = swap_latent:size(2)*math.pow(2,nUpsample), swap_latent:size(3)*math.pow(2,nUpsample)
-        img = image.crop(img:double(), 0,0, W,H)
+        img = image.crop(img:float(), 0,0, W,H)
         if not opt.cpu then img = img:cuda() end
         if opt.init == 'random' then img:uniform() end
         criterion.net.modules[#criterion.net.modules]:setTarget(swap_latent)
