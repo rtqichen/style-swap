@@ -157,7 +157,7 @@ function synth(img)
     return x
 end
 
-style_img = image.load(opt.style)
+style_img = image.load(opt.style, 3)
 if style_img:size(2) > opt.maxStyleSize or style_img:size(3) > opt.maxStyleSize then
     style_img = image.scale(style_img, opt.maxStyleSize)
 end
@@ -242,7 +242,7 @@ print('Creating save folder at ' .. opt.save)
 paths.mkdir(opt.save)
 
 if opt.content ~= '' then
-    img = image.load(opt.content)
+    img = image.load(opt.content, 3)
     local H,W = img:size(2), img:size(3)
     if H > opt.maxContentSize or W > opt.maxContentSize then
         img = image.scale(img, opt.maxContentSize)
