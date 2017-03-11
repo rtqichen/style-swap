@@ -40,11 +40,11 @@ opt = lapp[[
 ]]
 print(opt)
 
-if contentDir == '' then
+if opt.contentDir == '' then
     error('--contentDir must be specified.')
 end
 
-if styleDir == '' then
+if opt.styleDir == '' then
     error('--styleDir must be specified.')
 end
 
