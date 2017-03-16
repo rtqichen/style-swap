@@ -120,7 +120,7 @@ else
                 dec:add(nn.SpatialConvolution(nInputPlane, nOutputPlane, 3,3, 1,1, 1,1):init('weight', nninit.orthogonal, {gain = 'relu'}))
             end
             if opt.instanceNorm then
-                dec:add(nn.SpatialInstanceNormalization(nOutputPlane))
+                dec:add(nn.InstanceNormalization(nOutputPlane))
             else
                 dec:add(nn.SpatialBatchNormalization(nOutputPlane))
             end
