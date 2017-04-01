@@ -18,7 +18,7 @@ opt = lapp[[
 --gpu                   (default 0)
 --patchSize             (default 3)             Patch size for style swap [Higher = More Style Texture]
 --patchStride           (default 1)             Patch stride for style swap operation
---pooling               (default 'avg')         One of [avg|max]
+--pooling               (default 'max')         One of [avg|max]
 --numSwap               (default 1)             Number of times to perform the style swap operation [Higher = More Style Contrast]
 
 --decoder               (default '')            Path to a trained decoder
