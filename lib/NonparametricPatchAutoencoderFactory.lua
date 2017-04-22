@@ -14,11 +14,11 @@ function NonparametricPatchAutoencoderFactory.buildAutoencoder(target_img, patch
     local target_patches = NonparametricPatchAutoencoderFactory._extract_patches(target_img, patch_size, stride, shuffle)
     local npatches = target_patches:size(1)
 
-    local conv_enc, conv_dec = NonparametricPatchAutoencoderFactory._build(patch_size, stride, type, C, target_patches, npatches, normalize, interpolate)
+    local conv_enc, conv_dec = NonparametricPatchAutoencoderFactory._build(patch_size, stride, C, target_patches, npatches, normalize, interpolate)
     return conv_enc, conv_dec
 end
 
-function NonparametricPatchAutoencoderFactory._build(patch_size, stride, type, C, target_patches, npatches, normalize, interpolate)
+function NonparametricPatchAutoencoderFactory._build(patch_size, stride, C, target_patches, npatches, normalize, interpolate)
     -- for each patch, divide by its L2 norm.
     local enc_patches = target_patches:clone()
     for i=1,npatches do
