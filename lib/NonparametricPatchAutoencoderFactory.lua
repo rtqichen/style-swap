@@ -1,5 +1,5 @@
 require 'nn'
-
+local floor = math.floor
 local NonparametricPatchAutoencoderFactory = torch.class('NonparametricPatchAutoencoderFactory')
 
 function NonparametricPatchAutoencoderFactory.buildAutoencoder(target_img, patch_size, stride, shuffle, normalize, interpolate)
@@ -98,14 +98,14 @@ function NonparametricPatchAutoencoderFactory._extract_patches(img, patch_size, 
     local nDim = 3
     assert(img:nDimension() == nDim, 'image must be of dimension 3.')
     local C, H, W = img:size(nDim-2), img:size(nDim-1), img:size(nDim)
-    local nH = math.floor( (H - patch_size)/stride + 1)
-    local nW = math.floor( (W - patch_size)/stride + 1)
+    local nH = floor( (H - patch_size)/stride + 1)
+    local nW = floor( (W - patch_size)/stride + 1)
 
     -- extract patches
     local patches = torch.Tensor(nH*nW, C, patch_size, patch_size):typeAs(img)
     for i=1,nH*nW do
-        local h = math.floor((i-1)/nW)  -- zero-index
-        local w = math.floor((i-1)%nW)  -- zero-index
+        local h = floor((i-1)/nW)  -- zero-index
+        local w = floor((i-1)%nW)  -- zero-index
         patches[i] = img[{{},
         {1 + h*stride, 1 + h*stride + patch_size-1},
         {1 + w*stride, 1 + w*stride + patch_size-1}
