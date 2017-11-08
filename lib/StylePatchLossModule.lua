@@ -19,10 +19,24 @@ end
 function module._extract_patches(img, patch_size, stride)
     local nDim = 3
     assert(img:nDimension() == nDim, 'image must be of dimension 3.')
+    
+    local kH, kW = patch_size, patch_size
+    local dH, dW = stride, stride
+    local patches = img:unfold(2, kh, kW):unfold(3, kW, dW)
+    local n1, n2, n3, n4, n5 = patches:size(1), patches:size(2), patches:size(3), patches:size(4), patches:size(5)
+    patches = patches:permute(2,3,1,4,5):contiguous():view(n2*n3, n1, n4, n5)
+
+    return patches
+end
+
+-- This approach of extracting patches is much slower.
+--[[
+function module._extract_patches(img, patch_size, stride)
+    local nDim = 3
+    assert(img:nDimension() == nDim, 'image must be of dimension 3.')
     local C, H, W = img:size(nDim-2), img:size(nDim-1), img:size(nDim)
     local nH = math.floor( (H - patch_size)/stride + 1)
     local nW = math.floor( (W - patch_size)/stride + 1)
-
     -- extract patches
     local patches = torch.Tensor(nH*nW, C, patch_size, patch_size):typeAs(img)
     for i=1,nH*nW do
@@ -33,9 +47,9 @@ function module._extract_patches(img, patch_size, stride)
         {1 + w*stride, 1 + w*stride + patch_size-1}
         }]
     end
-
     return patches
 end
+]]
 
 function module:setTarget(target_features, patch_size, patch_stride)
     assert(target_features:nDimension() == 3, 'Target must be 3D')
@@ -123,7 +137,6 @@ end
 
 --[[
 TODO:
-
 - instead of using nn.MSECriterion, which computes (x-a0) + (x-a1) + (x-a2) + ... + (x-ak),
 calculate gradInput by summing up the target pixel values in the forward step and compute
 (k*x - (a0+a1+a2+...ak))
