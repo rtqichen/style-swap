@@ -98,7 +98,7 @@ function NonparametricPatchAutoencoderFactory._extract_patches(img, patch_size, 
     assert(img:nDimension() == nDim, 'image must be of dimension 3.')
     local kH, kW = patch_size, patch_size
     local dH, dW = stride, stride
-    local patches = img:unfold(2, kh, kW):unfold(3, kW, dW)
+    local patches = img:unfold(2, kH, dH):unfold(3, kW, dW)
     local n1, n2, n3, n4, n5 = patches:size(1), patches:size(2), patches:size(3), patches:size(4), patches:size(5)
     patches = patches:permute(2,3,1,4,5):contiguous():view(n2*n3, n1, n4, n5)
 
