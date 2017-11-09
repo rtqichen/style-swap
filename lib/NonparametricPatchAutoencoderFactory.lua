@@ -1,5 +1,4 @@
 require 'nn'
-local floor = math.floor
 local NonparametricPatchAutoencoderFactory = torch.class('NonparametricPatchAutoencoderFactory')
 
 function NonparametricPatchAutoencoderFactory.buildAutoencoder(target_img, patch_size, stride, shuffle, normalize, interpolate)
@@ -97,20 +96,11 @@ end
 function NonparametricPatchAutoencoderFactory._extract_patches(img, patch_size, stride, shuffle)
     local nDim = 3
     assert(img:nDimension() == nDim, 'image must be of dimension 3.')
-    local C, H, W = img:size(nDim-2), img:size(nDim-1), img:size(nDim)
-    local nH = floor( (H - patch_size)/stride + 1)
-    local nW = floor( (W - patch_size)/stride + 1)
-
-    -- extract patches
-    local patches = torch.Tensor(nH*nW, C, patch_size, patch_size):typeAs(img)
-    for i=1,nH*nW do
-        local h = floor((i-1)/nW)  -- zero-index
-        local w = floor((i-1)%nW)  -- zero-index
-        patches[i] = img[{{},
-        {1 + h*stride, 1 + h*stride + patch_size-1},
-        {1 + w*stride, 1 + w*stride + patch_size-1}
-        }]
-    end
+    local kH, kW = patch_size, patch_size
+    local dH, dW = stride, stride
+    local patches = img:unfold(2, kH, dH):unfold(3, kW, dW)
+    local n1, n2, n3, n4, n5 = patches:size(1), patches:size(2), patches:size(3), patches:size(4), patches:size(5)
+    patches = patches:permute(2,3,1,4,5):contiguous():view(n2*n3, n1, n4, n5)
 
     if shuffle then
         local shuf = torch.randperm(patches:size(1)):long()
