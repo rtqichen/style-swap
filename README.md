@@ -80,7 +80,7 @@ More options:
 th train-vgg-decoder.lua --help
 ```
 
-For training the network in our paper, we used images from [MS COCO](http://mscoco.org/) and the [Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers) competition hosted by Kaggle.
+For training the network in our paper, we used images from [MS COCO](http://mscoco.org/) and the [Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers) competition hosted by Kaggle. A trained network can be downloaded [here](https://www.dropbox.com/s/633jjokod67yi1j/dec-tconv-sigmoid.t7?dl=1).
 
 ### Video
 Frame-by-frame stylization can be done using the `-contentBatch` option.
